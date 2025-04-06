@@ -1,5 +1,4 @@
-require("dotenv").config();
-
+const mongoose = require('mongoose');
 const express = require('express');
 const app = express();
 
@@ -13,17 +12,9 @@ app.use('/api/v1/user', userRouter);
 app.use('/api/v1/course', courseRouter);
 app.use('/api/v1/admin', adminRouter);
 
-const PORT = process.env.PORT || 3000;
-
 async function main(){
-    try{
-            app.listen(PORT, ()=>{
-            console.log("Server is running on port 3000");
-        });
-    }
-    catch(e){
-        console.error("Failed to connect to the database", e);
-    }
+    await mongoose.connect("mongodb+srv://aakansha:aakansha12@cluster0.qhsgoyw.mongodb.net/DevShaala");
+    app.listen(3000);
 }
 
 main();
