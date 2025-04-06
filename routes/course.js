@@ -1,15 +1,9 @@
-const { Router } = require('express');
-const {courseRouter} = Router();
+const { Router } = require('express')
+const courseRouter = Router();
 
-courseRouter.get('/courses', function(req, res){
+courseRouter.get('/preview', function(req, res){
     res.json({
-        message : "These are all the courses"
-    })
-})
-
-courseRouter.get('/purchases', function(req, res){
-    res.json({
-        message : "These are all the courses you purchased"
+        message : "These are all the courses available"
     })
 })
 
@@ -19,6 +13,6 @@ courseRouter.post('/purchase', function(req, res){
     })
 })
 
-module.exports({
+module.exports = {
     courseRouter: courseRouter
-})
+}

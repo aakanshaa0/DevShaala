@@ -9,9 +9,9 @@ const {courseRouter} = require('./routes/course');
 
 app.use(express.json());
 
-app.use('/user', userRouter);
-app.use('/course', courseRouter);
-app.use('/admin', adminRouter);
+app.use('/api/v1/user', userRouter);
+app.use('/api/v1/course', courseRouter);
+app.use('/api/v1/admin', adminRouter);
 
 const PORT = process.env.PORT || 3000;
 
