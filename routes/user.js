@@ -1,65 +1,77 @@
-const { Router } = require("express");        
+const { Router } = require("express");
+const { userModel, purchaseModel, courseModel } = require("../db");
+const jwt = require("jsonwebtoken");
+const  { JWT_USER_PASSWORD } = require("../config");
+const { userMiddleware } = require("../middleware/user");
+
 const userRouter = Router();
 
-const {userModel} = require('../db');
-const {userMiddleware} = require('../middleware/user');
-const {JWT_USER_PASSWORD} = require('../config');
+userRouter.post("/signup", async function(req, res) {
+    const { email, password, firstName, lastName } = req.body; // TODO: adding zod validation
+    // TODO: hash the password so plaintext pw is not stored in the DB
 
-userRouter.post("/signup", async function(req, res){
-    const {email, password, firstName, lastName} = req.body;
-    try{
-        const hashedPassword = bcrypt.hash(password, 5);
-        await userModel.create({
-            email: email,
-            password: hashedPassword,
-            firstName: firstName,
-            lastName: lastName
-        })
-        res.json({
-            message: "Signup endpoint"
-        })
-    }
-    catch(e){
-        res.status(403).json({
-            message: "Error signing up"
-        })
-    }
+    // TODO: Put inside a try catch block
+    await userModel.create({
+        email: email,
+        password: password,
+        firstName: firstName, 
+        lastName: lastName
+    })
+    
+    res.json({
+        message: "Signup succeeded"
+    })
 })
 
-userRouter.post("/signin", async function(req, res){
-    const {email, password, firstName, lastName} = req.body;
-    const user = await userModule.find({
-        email: email
-    })
-    if(!user){
-        res.json({
-            message: "User doesn't exist"
-        })
-        return;
-    }
-    const passwordMatched = await bcrypt.compare(password, user.password);
-    if(passwordMatched){
+userRouter.post("/signin",async function(req, res) {
+    const { email, password } = req.body;
+
+    // TODO: ideally password should be hashed, and hence you cant compare the user provided password and the database password
+    const user = await userModel.findOne({
+        email: email,
+        password: password
+    }); //[]
+
+    if (user) {
         const token = jwt.sign({
-            id:user._id
+            id: user._id,
         }, JWT_USER_PASSWORD);
+
+        // Do cookie logic
+
         res.json({
             token: token
         })
-    }
-    else{
+    } else {
         res.status(403).json({
-            message: "Incorrect Credentials"
+            message: "Incorrect credentials"
         })
     }
 })
 
+userRouter.get("/purchases", userMiddleware, async function(req, res) {
+    const userId = req.userId;
 
-userRouter.get("/purchases", userMiddleware, function(req, res){
+    const purchases = await purchaseModel.find({
+        userId,
+    });
+
+    let purchasedCourseIds = [];
+
+    for (let i = 0; i<purchases.length;i++){ 
+        purchasedCourseIds.push(purchases[i].courseId)
+    }
+
+    const coursesData = await courseModel.find({
+        _id: { $in: purchasedCourseIds }
+    })
+
     res.json({
-        message: "Signup endpoint"
+        purchases,
+        coursesData
     })
 })
 
-module.exports = {   
+module.exports = {
     userRouter: userRouter
 }
