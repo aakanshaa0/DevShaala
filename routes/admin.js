@@ -8,19 +8,42 @@ const { adminMiddleware } = require("../middleware/admin");
 
 
 adminRouter.post("/signup", async function(req, res) {
+    const requiredBody = z.object({
+        email: z.String.min(3).max(100).email(),
+        password: z.String.min(3).max(100),
+        firstName: z.String().min(3).max(100),
+        lastName: z.String().min(3).max(100)
+    })
+
+    const parsedDataWithSuccess = requiredBody.safeParse(req.body);
+
+    if(!parsedDataWithSuccess.success){
+        return res.json({
+            message: "Incorrect Input Format",
+            error: parsedDataWithSuccess.error
+        })
+    }
+
     const { email, password, firstName, lastName } = req.body; // TODO: adding zod validation
     // TODO: hash the password so plaintext pw is not stored in the DB
 
+    const hashedPassword = await bcrypt.hash(password, 10);
     // TODO: Put inside a try catch block
-    await adminModel.create({
-        email: email,
-        password: password,
-        firstName: firstName, 
-        lastName: lastName
-    })
-    
+    try{
+        await adminModel.create({
+            email: email,
+            password: hashedPassword,
+            firstName: firstName, 
+            lastName: lastName
+        })
+    }
+    catch(e){
+        return res.json({
+            message: "Admin already exists"
+        })
+    }
     res.json({
-        message: "Signup succeeded"
+        message: "You are signed up"
     })
 })
 
