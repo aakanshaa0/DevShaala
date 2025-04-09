@@ -11,6 +11,8 @@ const { userMiddleware } = require("../middleware/user");
 
 const z = require("zod");
 
+const bcrypt = require("bcrypt");
+
 userRouter.post("/signup", async function(req, res) {    
     const requiredBody = z.object({
         email: z.string().min(3).max(100).email(),
