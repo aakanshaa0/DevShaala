@@ -7,12 +7,31 @@ const Navbar = () => {
   const { isAuthenticated, logout, isAdmin, isUser } = useAuth();
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isSignInOpen, setIsSignInOpen] = useState(false);
+  const [isSignUpOpen, setIsSignUpOpen] = useState(false);
 
   const handleLogout = () => {
     logout();
     navigate('/');
     setIsMenuOpen(false);
   };
+
+  // Close dropdowns when clicking outside
+  const handleClickOutside = (event: MouseEvent) => {
+    const target = event.target as HTMLElement;
+    if (!target.closest('.dropdown-container')) {
+      setIsSignInOpen(false);
+      setIsSignUpOpen(false);
+    }
+  };
+
+  // Add click outside listener
+  useState(() => {
+    document.addEventListener('click', handleClickOutside);
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+    };
+  });
 
   return (
     <nav className="bg-gradient-to-r from-blue-900 to-blue-800 text-white shadow-md">
@@ -33,44 +52,66 @@ const Navbar = () => {
             
             {!isAuthenticated() ? (
               <>
-                <div className="relative group">
-                  <button className="px-3 py-2 rounded-md hover:bg-blue-700 transition flex items-center">
+                <div className="relative dropdown-container">
+                  <button 
+                    className="px-3 py-2 rounded-md hover:bg-blue-700 transition flex items-center"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setIsSignInOpen(!isSignInOpen);
+                      setIsSignUpOpen(false);
+                    }}
+                  >
                     Sign In <span className="ml-1">▼</span>
                   </button>
-                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10 hidden group-hover:block">
-                    <Link 
-                      to="/user/signin" 
-                      className="block px-4 py-2 text-gray-800 hover:bg-gray-100"
-                    >
-                      Sign In as User
-                    </Link>
-                    <Link 
-                      to="/admin/signin" 
-                      className="block px-4 py-2 text-gray-800 hover:bg-gray-100"
-                    >
-                      Sign In as Admin
-                    </Link>
-                  </div>
+                  {isSignInOpen && (
+                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10">
+                      <Link 
+                        to="/user/signin" 
+                        className="block px-4 py-2 text-gray-800 hover:bg-gray-100"
+                        onClick={() => setIsSignInOpen(false)}
+                      >
+                        Sign In as User
+                      </Link>
+                      <Link 
+                        to="/admin/signin" 
+                        className="block px-4 py-2 text-gray-800 hover:bg-gray-100"
+                        onClick={() => setIsSignInOpen(false)}
+                      >
+                        Sign In as Admin
+                      </Link>
+                    </div>
+                  )}
                 </div>
                 
-                <div className="relative group">
-                  <button className="px-3 py-2 rounded-md hover:bg-blue-700 transition flex items-center">
+                <div className="relative dropdown-container">
+                  <button 
+                    className="px-3 py-2 rounded-md hover:bg-blue-700 transition flex items-center"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setIsSignUpOpen(!isSignUpOpen);
+                      setIsSignInOpen(false);
+                    }}
+                  >
                     Sign Up <span className="ml-1">▼</span>
                   </button>
-                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10 hidden group-hover:block">
-                    <Link 
-                      to="/user/signup" 
-                      className="block px-4 py-2 text-gray-800 hover:bg-gray-100"
-                    >
-                      Sign Up as User
-                    </Link>
-                    <Link 
-                      to="/admin/signup" 
-                      className="block px-4 py-2 text-gray-800 hover:bg-gray-100"
-                    >
-                      Sign Up as Admin
-                    </Link>
-                  </div>
+                  {isSignUpOpen && (
+                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10">
+                      <Link 
+                        to="/user/signup" 
+                        className="block px-4 py-2 text-gray-800 hover:bg-gray-100"
+                        onClick={() => setIsSignUpOpen(false)}
+                      >
+                        Sign Up as User
+                      </Link>
+                      <Link 
+                        to="/admin/signup" 
+                        className="block px-4 py-2 text-gray-800 hover:bg-gray-100"
+                        onClick={() => setIsSignUpOpen(false)}
+                      >
+                        Sign Up as Admin
+                      </Link>
+                    </div>
+                  )}
                 </div>
               </>
             ) : (
